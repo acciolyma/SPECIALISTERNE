@@ -1,0 +1,83 @@
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from datetime import datetime, timedelta
+import time
+import pytz
+
+# Função para enviar o e-mail
+def enviar_email():
+    # Informações do remetente e destinatários
+    remetente = "" # Insira o seu e-mail
+    senha_app = ""  # Gere no Gmail
+    destinatarios = ["daiane.lourenco@specialisterne.com", "gustavo.izidro@specialisterne.com", "murilo.paiva@specialisterne.com"]
+
+    # Título do e-mail com a data de hoje
+    hoje = datetime.now().strftime('%d/%m/%Y')
+    assunto = f"Registro Diário de Atividades - Curso de Capacitação [{hoje}]"
+
+    # Corpo do e-mail formatado em HTML
+    corpo = f"""
+    <p><b>Boa tarde, Dai, Murilo e Gustavo!</b></p>
+
+    <p>Espero que vocês estejam bem. Abaixo está o registro das atividades realizadas hoje:</p>
+
+    <p><b>Despedida da Atividades do Dia - [{hoje}]</b></p>
+
+    <p>09:00 - 11:20 Ajustes final apresentação site <br>
+    11:20 - 11:30 Pausa <br>
+    11:30 - 12:10 Inicio treinamento apresentação <br>
+    12:10 - 12:30 Formulário de avaliação Specialisterne <br>
+    12:30 - 13:30 Almoço<br>
+    13:30 - 16:00 Apresentações
+    15:02 - 15:07 Pausa <br>
+    15:07 - 16:00 Formatura
+    </p>
+
+
+
+
+
+
+    <p>Agradeço a atenção e fico à disposição para dúvidas ou comentários.</p>
+
+    <p>Atenciosamente,<br>Maria Accioly</p>
+    """
+
+    # Configuração da mensagem
+    msg = MIMEMultipart()
+    msg['From'] = remetente
+    msg['To'] = ", ".join(destinatarios)
+    msg['Subject'] = assunto
+
+    # Anexando o corpo do e-mail
+    msg.attach(MIMEText(corpo, 'html'))
+
+    # Configurando o servidor SMTP do Gmail
+    try:
+        servidor = smtplib.SMTP('smtp.gmail.com', 587)
+        servidor.starttls()
+        servidor.login(remetente, senha_app)
+        servidor.sendmail(remetente, destinatarios, msg.as_string())
+        servidor.quit()
+        print("E-mail enviado com sucesso!")
+    except Exception as e:
+        print(f"Falha ao enviar o e-mail: {e}")
+
+# Função para calcular o tempo até as 16:00 no horário de Brasília
+def esperar_ate_as_16():
+    fuso_horario_brasilia = pytz.timezone('America/Sao_Paulo')
+    agora = datetime.now(fuso_horario_brasilia)
+    horario_envio = agora.replace(hour=16, minute=0, second=0, microsecond=0)
+
+    # Se ainda não passou das 16:00, esperar até lá
+    if agora < horario_envio:
+        tempo_para_esperar = (horario_envio - agora).total_seconds()
+        print(f"Esperando {tempo_para_esperar / 60:.2f} minutos para enviar o e-mail.")
+        time.sleep(tempo_para_esperar)
+    else:
+        print("Já passou das 16:00, enviando o e-mail imediatamente.")
+
+# Programa principal
+esperar_ate_as_16()
+enviar_email()
